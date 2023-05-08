@@ -1,0 +1,14 @@
+// dir
+.cache
+.auto-save-list
+elpa
+eln-cache
+eshell
+transient
+server
+
+
+// file
+
+.lsp-session-v1
+*~
