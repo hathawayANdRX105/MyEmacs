@@ -72,6 +72,7 @@
 ;; modeline
 (use-package doom-modeline
   ;; :after all-the-icons
+;;  :straight t
   :hook
   (prog-mode	.	doom-modeline-mode)
   (org-src-mode .	(lambda () (setq-local mode-line-format nil)))

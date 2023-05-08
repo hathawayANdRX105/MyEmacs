@@ -25,6 +25,8 @@
   ;; don't suspend emacs frame.
   (global-unset-key (kbd "C-z"))
   (global-unset-key (kbd "C-x C-z"))
+  ;; don't use origin emacs undo keybinding
+  (global-unset-key (kbd "C-/"))
   )
 
 

@@ -6,9 +6,11 @@ eln-cache
 eshell
 transient
 server
+straight
 
 
 // file
 
 .lsp-session-v1
 *~
+*#

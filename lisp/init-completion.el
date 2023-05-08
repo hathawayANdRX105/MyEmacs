@@ -5,11 +5,71 @@
 ;;; Code:
 
 
-(use-package corfu
+;; completion filter support
+(use-package orderless
+  :defer 1
+  :config
+  ;; use cheap prefix filtering to sort candidates
+  (defun orderless-fast-dispatch (word index total)
+    (and (= index 0) (= total 1) (length< word 4)
+         `(orderless-regexp . ,(concat "^" (regexp-quote word)))))
+
+  (orderless-define-completion-style orderless-fast
+    (orderless-dispatch '(orderless-fast-dispatch))
+    (orderless-matching-styles '(orderless-literal orderless-regexp)))
+
+  (setq completion-styles '(orderless-fast)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion))))
+  (setq read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t))
+
+;; Enable vertico for M-x helpful display
+(use-package vertico
   :defer 2
+  :init
+  (vertico-mode)
+  ;; Different scroll margin
+  (setq vertico-scroll-margin 0)
+  ;; Show more candidates
+  (setq vertico-count 20)
+  ;; Grow and shrink the Vertico minibuffer
+  (setq vertico-resize t)
+  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+  (setq vertico-cycle t))
+
+;; explatin M-x command
+(use-package marginalia
+  :defer 5
+  :init
+  (marginalia-mode)
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle)))
+
+
+(use-package emacs
+  :defer 2
+  :init
+  (defun crm-indicator (args)
+    (cons (format "[CRM%s] %s"
+                  (replace-regexp-in-string
+                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                   crm-separator)
+                  (car args))
+          (cdr args)))
+  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+  (setq enable-recursive-minibuffers t))
+
+
+(use-package corfu
+  :after orderless
+  :load-path "straight/build/corfu/extensions"
   :hook
-  ;; (minibuffer-setup	.	corfu-mode)
-  ;; (minibuffer-setup	.	corfu-enable-in-minibuffer)
   (eshell-mode . (lambda ()
 		   (setq-local corfu-auto t)
 		   (corfu-mode)
@@ -24,12 +84,6 @@
   (corfu-on-exact-match 'quit)
   (corfu-preview-current 'insert)
   (corfu-popupinfo-hide nil)
-
-  ;; :init
-  ;; (defun corfu-enable-in-minibuffer ()
-  ;;   (when (where-is-internal #'completion-at-point (list (current-local-map)))
-  ;;     (corfu-mode 1)))
-
   :bind
   (:map corfu-map
         ("<escape>"	.	#'corfu-quit)
@@ -38,15 +92,18 @@
         ("<tab>"	.	#'corfu-complete))
 
   :config
+  (global-corfu-mode)
   (setq completion-cycle-threshold 3)
-  ;; (setq tab-always-indent 'complete)
-  (corfu-history-mode t)
-  (global-corfu-mode))
+  
+  (require 'corfu-history)
+  (corfu-history-mode)
+  (savehist-mode 1)
+  (add-to-list 'savehist-additional-variables 'corfu-history))
 
+;; (add-to-list 'load-path (expand-file-name "straight/build/corfu/extensions" user-emacs-directory)
 
 ;; icons of completions
 (use-package kind-icon
-  ;;:demand t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default)
@@ -56,10 +113,8 @@
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 
-
 ;; completions backends
 (use-package cape
-  :demand t
   :after corfu
   :config
   (setq-local add-to-completion (lambda(cape-backend) (add-to-list 'completion-at-point-functions cape-backend)))
@@ -68,8 +123,8 @@
 ;; Snippet
 (use-package yasnippet
   :diminish yas-minor-mode
-  :hook ((prog-mode org-mode) . yas-minor-mode)
-  :bind (("M-`" . #'yas-expand))
+  :hook (prog-mode . yas-minor-mode)
+  :bind ("M-`" . #'yas-expand)
   :config
   (setq yas-snippet-dirs
         '("~/.emacs.d/snippets"))
