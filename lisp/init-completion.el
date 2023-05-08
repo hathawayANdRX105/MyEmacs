@@ -25,6 +25,26 @@
         read-buffer-completion-ignore-case t
         completion-ignore-case t))
 
+;; fuzzy filter support
+(use-package fussy
+  :defer 2
+  :config
+  (push 'fussy completion-styles)
+  (setq
+   ;; For example, project-find-file uses 'project-files which uses
+   ;; substring completion by default. Set to nil to make sure it's using
+   ;; flx.
+   completion-category-defaults nil
+   completion-category-overrides nil))
+
+(use-package flx-rs
+  :disabled t
+  :after fussy
+  :config
+  (setq fussy-score-fn 'flx-rs-score)
+  (flx-rs-load-dyn))
+
+
 ;; Enable vertico for M-x helpful display
 (use-package vertico
   :defer 2
@@ -67,6 +87,7 @@
 
 
 (use-package corfu
+  :disabled t
   :after orderless
   :load-path "straight/build/corfu/extensions"
   :hook
@@ -104,6 +125,7 @@
 
 ;; icons of completions
 (use-package kind-icon
+  :disabled t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default)
@@ -115,10 +137,12 @@
 
 ;; completions backends
 (use-package cape
+  :disabled t
   :after corfu
   :config
   (setq-local add-to-completion (lambda(cape-backend) (add-to-list 'completion-at-point-functions cape-backend)))
   (mapc add-to-completion '(cape-keyword cape-dabbrev cape-file)))
+
 
 ;; Snippet
 (use-package yasnippet
@@ -136,8 +160,12 @@
   :after yasnippet)
 
 
+
+
+
 ;; language server
 (use-package lsp-mode
+  :disabled t
   :commands (lsp lsp-deferred)
   :hook
   (go-mode . lsp-deferred)
@@ -200,6 +228,7 @@
 
 
 (use-package lsp-ui
+  :disabled t
   :after lsp-mode
   :hook (lsp-mode . lsp-ui-mode)
   :custom
@@ -215,6 +244,7 @@
             "/ i" #'lsp-ui-imenu))
 
 (use-package consult-lsp
+  :disabled t
   :after lsp-mode
   :commands (consult-lsp-diagnostics
              consult-lsp-symbols
@@ -223,6 +253,7 @@
 
 ;; syntax checker
 (use-package flycheck
+  :disabled t
   :hook (lsp-mode . global-flycheck-mode)
   :init
   (setq flycheck-global-modes
@@ -241,6 +272,58 @@
   :general
   ('(meow-normal-state-keymap)
    "/ c" #'lsp-ui-flycheck-list))
+
+
+
+
+
+
+;; (add-to-list 'load-path (expand-file-name "quelpa/build/lsp-bridge" user-emacs-directory))
+
+;; (require 'yasnippet)
+;; (yas-global-mode 1)
+
+;; (require 'lsp-bridge)
+;; (global-lsp-bridge-mode)
+
+(use-package lsp-bridge
+  :defer 1
+  :after yasnippet
+  :quelpa (lsp-bridge :fetcher github :repo "manateelazycat/lsp-bridge")
+  :demand t
+  :hook (acm-mode . (lambda () (setq-local mode-line-format nil)))
+  :custom
+  ;; (acm-candidate-match-function 'orderless-prefixes)
+  (acm-candidate-match-function 'flx-find-best-match)
+  (acm-enable-quick-access t)
+  (acm-enable-tempel nil)
+  (acm-enable-doc nil)
+  ;; (acm-enable-tabnine-helper nil)
+  (lsp-bridge-enable-auto-format-code t)
+  (lsp-bridge-diagnostics-fetch-idle 0.5)
+  (lsp-bridge-auto-format-code-idle 15)
+  :config
+  (yas-global-mode 1)
+  (global-lsp-bridge-mode)
+  
+  :bind
+  (("<f2>" . #'lsp-bridge-rename)
+  :map acm-mode-map
+  ("M-j" . #'lsp-bridge-popup-documentation-scroll-down)
+  ("M-k" . #'lsp-bridge-popup-documentation-scroll-up)
+  :map meow-normal-state-keymap
+  ("M-d". #'lsp-bridge-popup-documentation)
+  ("/ d" . lsp-bridge-find-def)
+  ("/ D" . 'lsp-bridge-find-def-return)
+
+  ("/ a" . 'lsp-bridge-code-action)
+  ("/ i" . 'lsp-bridge-find-impl)
+  ("/ r" . 'lsp-bridge-find-references)
+  ("/ h" . 'lsp-bridge-signature-help-fetch)
+  ("/ g" . 'lsp-bridge-list-diagnostics)
+  ("/ 1" . 'lsp-bridge-jump-to-prev-diagnostic)
+  ("/ 2". 'lsp-bridge-jump-to-next-diagnostic)))
+
 
 
 (provide 'init-completion)

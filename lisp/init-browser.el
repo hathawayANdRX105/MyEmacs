@@ -57,7 +57,6 @@
 ;; file tabs
 (use-package centaur-tabs
   :defer 2
-  :after meow
   :hook
   (dirvish-mode		.	centaur-tabs-local-mode)
   (org-src-mode		.	centaur-tabs-local-mode)
@@ -66,7 +65,7 @@
   (org-agenda-mode	.	centaur-tabs-local-mode)
   (helpful-mode		.	centaur-tabs-local-mode)
   (dashboard-mode	.	centaur-tabs-local-mode)
-  (prog-mode		.	centaur-tabs-mode) ;lazy load centaur-tabs
+  ;; (prog-mode		.	centaur-tabs-mode) ;lazy load centaur-tabs
   :custom
   (centaur-tabs-style "bar")
   (centaur-tabs-height 32)
@@ -94,11 +93,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
        (centaur-tabs-get-group-name (current-buffer))))))
   :config
   (centaur-tabs-headline-match)
-  ;; (centaur-tabs-mode t)
-  :general
-  ("M-<left>"  #'centaur-tabs-backward)
-  ("M-<right>"  #'centaur-tabs-forward)
-  ("M-<down>"  #'centaur-tabs-switch-group))
+  (centaur-tabs-mode t)
+  :bind
+  ("M-<left>"  . #'centaur-tabs-backward)
+  ("M-<right>" . #'centaur-tabs-forward)
+  ("M-<down>"  . #'centaur-tabs-switch-group))
 
 (provide 'init-browser)
 ;;; init-browser.el ends here
