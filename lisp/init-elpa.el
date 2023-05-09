@@ -22,7 +22,7 @@
 (eval-when-compile
   (require 'use-package))
 
-(setq use-package-always-ensure t)
+;; (setq use-package-always-ensure t)
 
 
 (unless (package-installed-p 'quelpa)
@@ -39,9 +39,9 @@
 ;; (require 'quelpa-use-package)
 
 (use-package quelpa-use-package
-  :demand t
-  :config
-  (setq use-package-ensure-function 'quelpa))
+  :demand t)
+  ;; :config
+  ;; (setq use-package-ensure-function 'quelpa))
 
 ;; (cl-defun slot/vc-install (&key (fetcher "github") repo name rev backend)
 ;;   "Install a package from a remote if it's not already installed.

@@ -289,19 +289,22 @@
 (use-package lsp-bridge
   :defer 1
   :after yasnippet
-  :quelpa (lsp-bridge :fetcher github :repo "manateelazycat/lsp-bridge")
+  :ensure nil
   :demand t
-  :hook (acm-mode . (lambda () (setq-local mode-line-format nil)))
+  :quelpa (lsp-bridge :fetcher github :repo "manateelazycat/lsp-bridge")
+  :init
+  (add-to-list 'load-path (expand-file-name "quelpa/build/lsp-bridge" user-emacs-directory))
+  ;; :hook (acm-mode . (lambda () (setq-local mode-line-format nil)))
   :custom
   ;; (acm-candidate-match-function 'orderless-prefixes)
   (acm-candidate-match-function 'flx-find-best-match)
   (acm-enable-quick-access t)
   (acm-enable-tempel nil)
   (acm-enable-doc nil)
-  ;; (acm-enable-tabnine-helper nil)
   (lsp-bridge-enable-auto-format-code t)
   (lsp-bridge-diagnostics-fetch-idle 0.5)
   (lsp-bridge-auto-format-code-idle 15)
+  
   :config
   (yas-global-mode 1)
   (global-lsp-bridge-mode)
@@ -323,7 +326,6 @@
   ("/ g" . 'lsp-bridge-list-diagnostics)
   ("/ 1" . 'lsp-bridge-jump-to-prev-diagnostic)
   ("/ 2". 'lsp-bridge-jump-to-next-diagnostic)))
-
 
 
 (provide 'init-completion)

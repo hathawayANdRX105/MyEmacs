@@ -7,9 +7,10 @@
 (when (file-exists-p custom-file)
   (load custom-file 'noerror 'nomessage))
 
+;; config load path
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-
+;; load main configuration 
 (require 'init-elpa)
 (require 'init-default-config)
 (require 'init-ui)
